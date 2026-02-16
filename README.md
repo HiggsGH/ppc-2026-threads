@@ -1,10 +1,10 @@
 # Parallel Programming Course
 
-[![Build application](https://github.com/learning-process/parallel_programming_course/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/learning-process/parallel_programming_course/actions/workflows/main.yml)
+[![Build application](https://github.com/learning-process/ppc-2026-threads/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/learning-process/ppc-2026-threads/actions/workflows/main.yml)
 [![Pages](https://github.com/learning-process/parallel_programming_course/actions/workflows/pages.yml/badge.svg?branch=master)](https://github.com/learning-process/parallel_programming_course/actions/workflows/pages.yml)
-[![CodeQL](https://github.com/learning-process/parallel_programming_course/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/learning-process/parallel_programming_course/actions/workflows/codeql.yml)
-[![codecov](https://codecov.io/gh/learning-process/parallel_programming_course/graph/badge.svg?token=qCOtqeFyIz)](https://codecov.io/gh/learning-process/parallel_programming_course)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/learning-process/parallel_programming_course/badge)](https://scorecard.dev/viewer/?uri=github.com/learning-process/parallel_programming_course)
+[![CodeQL](https://github.com/learning-process/ppc-2026-threads/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/learning-process/ppc-2026-threads/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/learning-process/ppc-2026-threads/graph/badge.svg?token=qCOtqeFyIz)](https://codecov.io/gh/learning-process/ppc-2026-threads)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/learning-process/ppc-2026-threads/badge)](https://scorecard.dev/viewer/?uri=github.com/learning-process/ppc-2026-threads)
 
 Welcome to the Parallel Programming Course!
 
@@ -14,8 +14,8 @@ Resources:
   [English](https://learning-process.github.io/parallel_programming_course/en/),
   [Russian](https://learning-process.github.io/parallel_programming_course/ru/)
 - [Parallel Programming Course Slides](https://learning-process.github.io/parallel_programming_slides/)
-- [Course Scoreboard](https://learning-process.github.io/parallel_programming_course/scoreboard/)
-- [Code Coverage Report](https://learning-process.github.io/parallel_programming_course/coverage/)
+- [Course Scoreboard](https://learning-process.github.io/ppc-2026-threads/scoreboard/)
+- [Code Coverage Report](https://learning-process.github.io/ppc-2026-threads/coverage/)
 
 ## Parallel programming technologies
 
