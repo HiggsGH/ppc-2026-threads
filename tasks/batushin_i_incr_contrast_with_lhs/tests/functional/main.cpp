@@ -33,7 +33,8 @@ class BatushinIRunFuncTestsThreads : public ppc::util::BaseRunFuncTests<InType, 
     std::vector<uint8_t> img;
     // Read image in RGB to ensure consistent channel count
     {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(std::string(PPC_ID_batushin_i_incr_contrast_with_lhs), "pic.ppm");
+      std::string abs_path =
+          ppc::util::GetAbsoluteTaskPath(std::string(PPC_ID_batushin_i_incr_contrast_with_lhs), "pic.ppm");
       auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
       if (data == nullptr) {
         throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
@@ -70,12 +71,12 @@ TEST_P(BatushinIRunFuncTestsThreads, MatmulFromPic) {
 
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
-const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
-                   ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
-                   ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
-                   ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
-                   ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs));
+const auto kTestTasksList = std::tuple_cat(
+    ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
+    ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
+    ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
+    ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs),
+    ppc::util::AddFuncTask<BatushinITestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_batushin_i_incr_contrast_with_lhs));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 

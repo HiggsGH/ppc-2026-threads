@@ -31,7 +31,8 @@ namespace {
 
 const auto kAllPerfTasks =
     ppc::util::MakeAllPerfTasks<InType, BatushinITestTaskSEQ, BatushinITestTaskSEQ, BatushinITestTaskSEQ,
-                                BatushinITestTaskSEQ, BatushinITestTaskSEQ>(PPC_SETTINGS_batushin_i_incr_contrast_with_lhs);
+                                BatushinITestTaskSEQ, BatushinITestTaskSEQ>(
+        PPC_SETTINGS_batushin_i_incr_contrast_with_lhs);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
