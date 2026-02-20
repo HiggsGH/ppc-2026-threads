@@ -7,7 +7,7 @@
 namespace batushin_i_incr_contrast_with_lhs {
 
 class BatushinIRunPerfTestThreads : public ppc::util::BaseRunPerfTests<InType, OutType> {
-const size_t kPixelsCount_ = static_cast<size_t>(8192) * 8192;
+  const size_t kPixelsCount_ = static_cast<size_t>(8192) * 8192;
   InType input_data_;
 
   void SetUp() override {
@@ -31,9 +31,8 @@ TEST_P(BatushinIRunPerfTestThreads, IncreaseContrastTest) {
 }
 
 namespace {
-  const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BatushinITestTaskSEQ>(
-        PPC_SETTINGS_batushin_i_incr_contrast_with_lhs);
+const auto kAllPerfTasks =
+    ppc::util::MakeAllPerfTasks<InType, BatushinITestTaskSEQ>(PPC_SETTINGS_batushin_i_incr_contrast_with_lhs);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
