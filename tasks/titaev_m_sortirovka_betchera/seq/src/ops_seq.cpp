@@ -5,8 +5,28 @@
 #include <cstring>
 #include <vector>
 
-#include "titaev_m_sortirovka_betchera/common/include/common.hpp"
 namespace titaev_m_sortirovka_betchera {
+
+namespace {
+
+uint64_t DoubleToOrderedUint(double value) {
+  uint64_t x = 0;
+  std::memcpy(&x, &value, sizeof(double));
+  auto sx = static_cast<int64_t>(x);
+  uint64_t mask = (static_cast<uint64_t>(sx >> 63) & 0x7FFFFFFFFFFFFFFFULL);
+  return x ^ mask;
+}
+
+double OrderedUintToDouble(uint64_t x) {
+  auto sx = static_cast<int64_t>(x);
+  uint64_t mask = (static_cast<uint64_t>((sx >> 63) - 1) & 0x7FFFFFFFFFFFFFFFULL);
+  x ^= mask;
+  double result = 0;
+  std::memcpy(&result, &x, sizeof(double));
+  return result;
+}
+
+}  // namespace
 
 TitaevSortirovkaBetcheraSEQ::TitaevSortirovkaBetcheraSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
@@ -23,6 +43,77 @@ bool TitaevSortirovkaBetcheraSEQ::PreProcessingImpl() {
   return true;
 }
 
+void TitaevSortirovkaBetcheraSEQ::ConvertToKeys(std::vector<uint64_t> &keys) {
+  auto &result = GetOutput();
+  const size_t n = result.size();
+  for (size_t i = 0; i < n; i++) {
+    keys[i] = DoubleToOrderedUint(result[i]);
+  }
+}
+
+void TitaevSortirovkaBetcheraSEQ::RadixSort(std::vector<uint64_t> &keys) {
+  const size_t n = keys.size();
+  if (n <= 1) {
+    return;
+  }
+
+  constexpr int bits = 8;
+  constexpr int buckets = 1 << bits;
+  constexpr int passes = 64 / bits;
+
+  std::vector<uint64_t> tmp(n);
+
+  for (int pass = 0; pass < passes; pass++) {
+    std::vector<size_t> count(buckets, 0);
+
+    for (size_t i = 0; i < n; i++) {
+      size_t bucket = (keys[i] >> (pass * bits)) & (buckets - 1);
+      count[bucket]++;
+    }
+
+    for (int i = 1; i < buckets; i++) {
+      count[i] += count[i - 1];
+    }
+
+    for (size_t i = n; i-- > 0;) {
+      size_t bucket = (keys[i] >> (pass * bits)) & (buckets - 1);
+      tmp[--count[bucket]] = keys[i];
+    }
+
+    keys.swap(tmp);
+  }
+}
+
+void TitaevSortirovkaBetcheraSEQ::ConvertFromKeys(const std::vector<uint64_t> &keys) {
+  auto &result = GetOutput();
+  const size_t n = result.size();
+  for (size_t i = 0; i < n; i++) {
+    result[i] = OrderedUintToDouble(keys[i]);
+  }
+}
+
+void TitaevSortirovkaBetcheraSEQ::BatcherSort() {
+  auto &result = GetOutput();
+  const size_t n = result.size();
+
+  for (size_t step = 1; step < n; step <<= 1) {
+    for (size_t stage = step; stage > 0; stage >>= 1) {
+      for (size_t i = 0; i < n; i++) {
+        size_t j = i ^ stage;
+        if (j <= i || j >= n) {
+          continue;
+        }
+
+        const bool ascending = (i & step) == 0;
+        const bool needSwap = ascending ? result[i] > result[j] : result[i] < result[j];
+        if (needSwap) {
+          std::swap(result[i], result[j]);
+        }
+      }
+    }
+  }
+}
+
 bool TitaevSortirovkaBetcheraSEQ::RunImpl() {
   auto &result = GetOutput();
   const size_t n = result.size();
@@ -31,70 +122,10 @@ bool TitaevSortirovkaBetcheraSEQ::RunImpl() {
   }
 
   std::vector<uint64_t> keys(n);
-  for (size_t i = 0; i < n; i++) {
-    uint64_t x = 0;
-    std::memcpy(&x, &result[i], sizeof(double));
-
-    int64_t sx = static_cast<int64_t>(x);
-    uint64_t mask = (static_cast<uint64_t>(sx >> 63) & 0x7FFFFFFFFFFFFFFFULL);
-    x ^= mask;
-
-    keys[i] = x;
-  }
-
-  std::vector<uint64_t> tmp(n);
-  const int BITS = 8;
-  const int BUCKETS = 1 << BITS;
-  const int PASSES = 64 / BITS;
-
-  for (int pass = 0; pass < PASSES; pass++) {
-    std::vector<size_t> count(BUCKETS, 0);
-
-    for (size_t i = 0; i < n; i++) {
-      size_t bucket = (keys[i] >> (pass * BITS)) & (BUCKETS - 1);
-      count[bucket]++;
-    }
-
-    for (int i = 1; i < BUCKETS; i++) {
-      count[i] += count[i - 1];
-    }
-
-    for (size_t i = n; i-- > 0;) {
-      size_t bucket = (keys[i] >> (pass * BITS)) & (BUCKETS - 1);
-      tmp[--count[bucket]] = keys[i];
-    }
-
-    keys.swap(tmp);
-  }
-
-  for (size_t i = 0; i < n; i++) {
-    uint64_t x = keys[i];
-
-    int64_t sx = static_cast<int64_t>(x);
-    uint64_t mask = (static_cast<uint64_t>((sx >> 63) - 1) & 0x7FFFFFFFFFFFFFFFULL);
-    x ^= mask;
-
-    std::memcpy(&result[i], &x, sizeof(double));
-  }
-
-  for (size_t p = 1; p < n; p <<= 1) {
-    for (size_t k = p; k > 0; k >>= 1) {
-      for (size_t i = 0; i < n; i++) {
-        size_t j = i ^ k;
-        if (j > i && j < n) {
-          if ((i & p) == 0) {
-            if (result[i] > result[j]) {
-              std::swap(result[i], result[j]);
-            }
-          } else {
-            if (result[i] < result[j]) {
-              std::swap(result[i], result[j]);
-            }
-          }
-        }
-      }
-    }
-  }
+  ConvertToKeys(keys);
+  RadixSort(keys);
+  ConvertFromKeys(keys);
+  BatcherSort();
 
   return true;
 }

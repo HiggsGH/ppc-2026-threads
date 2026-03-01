@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include "task/include/task.hpp"
 #include "titaev_m_sortirovka_betchera/common/include/common.hpp"
 
@@ -17,6 +20,11 @@ class TitaevSortirovkaBetcheraSEQ : public BaseTask {
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
+
+  void ConvertToKeys(std::vector<uint64_t> &keys);
+  void RadixSort(std::vector<uint64_t> &keys);
+  void ConvertFromKeys(const std::vector<uint64_t> &keys);
+  void BatcherSort();
 };
 
 }  // namespace titaev_m_sortirovka_betchera

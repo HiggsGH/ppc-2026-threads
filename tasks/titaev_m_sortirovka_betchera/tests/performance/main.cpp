@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <random>
 
 #include "titaev_m_sortirovka_betchera/common/include/common.hpp"
@@ -11,15 +12,16 @@ namespace titaev_m_sortirovka_betchera {
 class TitaevBatcherRadixPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   static constexpr size_t kSize = 200000;
-  InType input_;
+  InType input;
 
   void SetUp() override {
-    std::mt19937 gen(777);
+    std::random_device rd;
+    std::mt19937 gen(rd());
     std::uniform_real_distribution<double> dist(-10000.0, 10000.0);
 
-    input_.resize(kSize);
+    input.resize(kSize);
     for (size_t i = 0; i < kSize; i++) {
-      input_[i] = dist(gen);
+      input[i] = dist(gen);
     }
   }
 
@@ -33,7 +35,7 @@ class TitaevBatcherRadixPerfTests : public ppc::util::BaseRunPerfTests<InType, O
   }
 
   InType GetTestInputData() final {
-    return input_;
+    return input;
   }
 };
 
@@ -47,7 +49,6 @@ const auto kPerfTasks =
     ppc::util::MakeAllPerfTasks<InType, TitaevSortirovkaBetcheraSEQ>(PPC_SETTINGS_titaev_m_sortirovka_betchera);
 
 const auto kValues = ppc::util::TupleToGTestValues(kPerfTasks);
-
 const auto kNameGen = TitaevBatcherRadixPerfTests::CustomPerfTestName;
 
 INSTANTIATE_TEST_SUITE_P(PerformanceSortingTests, TitaevBatcherRadixPerfTests, kValues, kNameGen);
