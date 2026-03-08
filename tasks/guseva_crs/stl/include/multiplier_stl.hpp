@@ -1,13 +1,14 @@
 #pragma once
-#include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <execution>
+#include <functional>
 #include <numeric>
+#include <thread>
 #include <vector>
 
 #include "guseva_crs/common/include/common.hpp"
 #include "guseva_crs/common/include/multiplier.hpp"
+#include "util/include/util.hpp"
 
 namespace guseva_crs {
 
@@ -54,6 +55,15 @@ class MultiplierStl : public Multiplier {
     }
   }
 
+  static void ProcessRowsRange(const std::vector<std::size_t> &indices, std::size_t start, std::size_t end,
+                               const CRS &a, const CRS &bt, std::vector<std::vector<std::size_t>> &columns,
+                               std::vector<std::vector<double>> &values, std::vector<std::size_t> &row_index) {
+    for (std::size_t idx = start; idx < end; ++idx) {
+      std::size_t i = indices[idx];
+      ProcessRows(i, a, bt, columns, values, row_index);
+    }
+  }
+
  public:
   [[nodiscard]] CRS Multiply(const CRS &a, const CRS &b) const override {
     std::size_t n = a.nrows;
@@ -65,12 +75,33 @@ class MultiplierStl : public Multiplier {
     std::vector<std::size_t> row_index(n + 1, 0);
 
     std::vector<std::size_t> indices(n);
+#ifdef __APPLE__
     std::iota(indices.begin(), indices.end(), 0);
+#else
+    std::ranges::iota(indices, 0);
+#endif
 
-    std::for_each(std::execution::par_unseq, indices.begin(), indices.end(),
-                  [&a, &bt, &columns, &values, &row_index](std::size_t i) {
-      guseva_crs::MultiplierStl::ProcessRows(i, a, bt, columns, values, row_index);
-    });
+    std::size_t num_threads = ppc::util::GetNumThreads();
+    if (num_threads == 0) {
+      num_threads = 2;
+    }
+
+    std::vector<std::thread> threads;
+    std::size_t chunk_size = n / num_threads;
+    std::size_t remainder = n % num_threads;
+
+    std::size_t start = 0;
+    for (std::size_t thread = 0; thread < num_threads; ++thread) {
+      std::size_t end = start + chunk_size + (thread < remainder ? 1 : 0);
+
+      threads.emplace_back(ProcessRowsRange, std::ref(indices), start, end, std::cref(a), std::cref(bt),
+                           std::ref(columns), std::ref(values), std::ref(row_index));
+      start = end;
+    }
+
+    for (auto &thread : threads) {
+      thread.join();
+    }
 
     std::size_t nz = 0;
     for (std::size_t i = 0; i < n; i++) {
