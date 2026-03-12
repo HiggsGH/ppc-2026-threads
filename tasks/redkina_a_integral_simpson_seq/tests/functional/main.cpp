@@ -15,11 +15,18 @@
 #include "util/include/util.hpp"
 
 namespace redkina_a_integral_simpson_seq {
-
+namespace {
 InputData MakeInput(double (*func)(const std::vector<double> &), std::vector<double> a, std::vector<double> b,
-                    std::vector<int> n);
+                    std::vector<int> n) {
+  return InputData{.func = func, .a = std::move(a), .b = std::move(b), .n = std::move(n)};
+}
+
 TestType MakeTest(int id, double (*func)(const std::vector<double> &), std::vector<double> a, std::vector<double> b,
-                  std::vector<int> n, double expected);
+                  std::vector<int> n, double expected) {
+  return std::make_tuple(id, func, std::move(a), std::move(b), std::move(n), expected);
+}
+
+}  // namespace
 
 class RedkinaAIntegralSimpsonFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
@@ -51,30 +58,20 @@ class RedkinaAIntegralSimpsonFuncTests : public ppc::util::BaseRunFuncTests<InTy
 const double kPi = std::numbers::pi;
 const double kE = std::numbers::e;
 
-InputData MakeInput(double (*func)(const std::vector<double> &), std::vector<double> a, std::vector<double> b,
-                    std::vector<int> n) {
-  return InputData{.func = func, .a = std::move(a), .b = std::move(b), .n = std::move(n)};
-}
-
-TestType MakeTest(int id, double (*func)(const std::vector<double> &), std::vector<double> a, std::vector<double> b,
-                  std::vector<int> n, double expected) {
-  return std::make_tuple(id, func, std::move(a), std::move(b), std::move(n), expected);
-}
-
 const std::array<TestType, 20> kTestCases = {
-    {// 1D: ??????????????????
+    {// 1D: константная функция
      MakeTest(1, [](const std::vector<double> &) { return 1.0; }, std::vector<double>{0.0}, std::vector<double>{1.0},
               std::vector<int>{2}, 1.0),
 
-     // 1D: ????????????????
+     // 1D: линейная функция
      MakeTest(2, [](const std::vector<double> &x) { return x[0]; }, std::vector<double>{0.0}, std::vector<double>{1.0},
               std::vector<int>{2}, 0.5),
 
-     // 1D: ????????????????????????
+     // 1D: квадратичная функция
      MakeTest(3, [](const std::vector<double> &x) { return x[0] * x[0]; }, std::vector<double>{0.0},
               std::vector<double>{1.0}, std::vector<int>{2}, 1.0 / 3.0),
 
-     // 1D: ????????????????????
+     // 1D: кубическая функция
      MakeTest(4, [](const std::vector<double> &x) { return x[0] * x[0] * x[0]; }, std::vector<double>{0.0},
               std::vector<double>{1.0}, std::vector<int>{2}, 0.25),
 
@@ -90,7 +87,7 @@ const std::array<TestType, 20> kTestCases = {
      MakeTest(7, [](const std::vector<double> &x) { return std::exp(x[0]); }, std::vector<double>{0.0},
               std::vector<double>{1.0}, std::vector<int>{200}, kE - 1.0),
 
-     // 2D: ??????????????????
+     // 2D: константная функция
      MakeTest(8, [](const std::vector<double> &) { return 1.0; }, std::vector<double>{0.0, 0.0},
               std::vector<double>{1.0, 1.0}, std::vector<int>{2, 2}, 1.0),
 
@@ -122,7 +119,7 @@ const std::array<TestType, 20> kTestCases = {
      MakeTest(15, [](const std::vector<double> &x) { return x[0] * std::sin(x[1]); }, std::vector<double>{0.0, 0.0},
               std::vector<double>{1.0, kPi}, std::vector<int>{200, 200}, 1.0),
 
-     // 3D: ??????????????????
+     // 3D: константная функция
      MakeTest(16, [](const std::vector<double> &) { return 1.0; }, std::vector<double>{0.0, 0.0, 0.0},
               std::vector<double>{1.0, 1.0, 1.0}, std::vector<int>{2, 2, 2}, 1.0),
 
@@ -130,16 +127,16 @@ const std::array<TestType, 20> kTestCases = {
      MakeTest(17, [](const std::vector<double> &x) { return x[0] * x[1] * x[2]; }, std::vector<double>{0.0, 0.0, 0.0},
               std::vector<double>{1.0, 1.0, 1.0}, std::vector<int>{2, 2, 2}, 0.125),
 
-     // 3D: x^2 + y^2 + z^2 ???? [0,1]^3
+     // 3D: x^2 + y^2 + z^2 на [0,1]^3
      MakeTest(18, [](const std::vector<double> &x) { return (x[0] * x[0]) + (x[1] * x[1]) + (x[2] * x[2]); },
               std::vector<double>{0.0, 0.0, 0.0}, std::vector<double>{1.0, 1.0, 1.0}, std::vector<int>{2, 2, 2}, 1.0),
 
-     // 3D: x^2 + y^2 + z^2 ???? [-1,1]^3
+     // 3D: x^2 + y^2 + z^2 на [-1,1]^3
      MakeTest(19, [](const std::vector<double> &x) { return (x[0] * x[0]) + (x[1] * x[1]) + (x[2] * x[2]); },
               std::vector<double>{-1.0, -1.0, -1.0}, std::vector<double>{1.0, 1.0, 1.0}, std::vector<int>{2, 2, 2},
               8.0),
 
-     // 3D: sin(x)*cos(y)*exp(z) (?????????????????????? ?????????????????? ?????? ????????????????)
+     // 3D: sin(x)*cos(y)*exp(z) (интеграл должен быть близок к нулю)
      MakeTest(20, [](const std::vector<double> &x) {
   return std::sin(x[0]) * std::cos(x[1]) * std::exp(x[2]);
 }, std::vector<double>{0.0, 0.0, 0.0}, std::vector<double>{kPi, kPi, 1.0}, std::vector<int>{40, 40, 40}, 0.0)}};
