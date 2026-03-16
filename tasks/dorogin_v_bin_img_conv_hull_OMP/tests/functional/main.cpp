@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -11,6 +12,7 @@
 #include "dorogin_v_bin_img_conv_hull_OMP/common/include/common.hpp"
 #include "dorogin_v_bin_img_conv_hull_OMP/omp/include/ops_omp.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace dorogin_v_bin_img_conv_hull_omp {
 
@@ -25,7 +27,7 @@ BinaryImage MakeEmpty(int w, int h) {
 }
 
 void SetPixel(BinaryImage &img, int x, int y, std::uint8_t v = 1U) {
-  img.data[static_cast<std::size_t>(y) * static_cast<std::size_t>(img.width) + static_cast<std::size_t>(x)] = v;
+  img.data[(static_cast<std::size_t>(y) * static_cast<std::size_t>(img.width)) + static_cast<std::size_t>(x)] = v;
 }
 
 BinaryImage CaseSinglePoint() {
@@ -36,17 +38,17 @@ BinaryImage CaseSinglePoint() {
 
 BinaryImage CaseHorizontalSegment() {
   auto img = MakeEmpty(7, 3);
-  for (int x = 1; x <= 5; ++x) {
-    SetPixel(img, x, 1, 1U);
+  for (int xx = 1; xx <= 5; ++xx) {
+    SetPixel(img, xx, 1, 1U);
   }
   return img;
 }
 
 BinaryImage CaseRectangle() {
   auto img = MakeEmpty(6, 6);
-  for (int y = 1; y <= 4; ++y) {
-    for (int x = 2; x <= 4; ++x) {
-      SetPixel(img, x, y, 1U);
+  for (int yy = 1; yy <= 4; ++yy) {
+    for (int xx = 2; xx <= 4; ++xx) {
+      SetPixel(img, xx, yy, 1U);
     }
   }
   return img;
@@ -58,8 +60,8 @@ BinaryImage CaseTwoSeparated() {
   SetPixel(img, 2, 1);
   SetPixel(img, 1, 2);
   SetPixel(img, 2, 2);
-  for (int y = 0; y < 5; ++y) {
-    SetPixel(img, 6, y);
+  for (int yy = 0; yy < 5; ++yy) {
+    SetPixel(img, 6, yy);
   }
   return img;
 }
@@ -100,8 +102,7 @@ class DoroginVRunFuncTestsOMP : public ppc::util::BaseRunFuncTests<InType, OutTy
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    const bool has_foreground =
-        std::any_of(input_data_.data.begin(), input_data_.data.end(), [](std::uint8_t v) { return v != 0U; });
+    const bool has_foreground = std::ranges::any_of(input_data_.data, [](std::uint8_t v) { return v != 0U; });
     if (!has_foreground) {
       return output_data.empty();
     }

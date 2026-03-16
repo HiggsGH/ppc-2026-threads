@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <cstddef>
-#include <cstdint>
-#include <tuple>
 #include <vector>
 
 #include "dorogin_v_bin_img_conv_hull_OMP/common/include/common.hpp"
@@ -19,10 +17,11 @@ BinaryImage MakeCheckerboard(int w, int h, int block) {
   img.height = h;
   img.data.assign(static_cast<std::size_t>(w) * static_cast<std::size_t>(h), 0);
 
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
-      const bool on = ((x / block) % 2 == 0) && ((y / block) % 2 == 0);
-      img.data[static_cast<std::size_t>(y) * static_cast<std::size_t>(w) + static_cast<std::size_t>(x)] = on ? 1U : 0U;
+  for (int yy = 0; yy < h; ++yy) {
+    for (int xx = 0; xx < w; ++xx) {
+      const bool on = ((xx / block) % 2 == 0) && ((yy / block) % 2 == 0);
+      img.data[(static_cast<std::size_t>(yy) * static_cast<std::size_t>(w)) + static_cast<std::size_t>(xx)] =
+          on ? 1U : 0U;
     }
   }
 
