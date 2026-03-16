@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <ranges>
+#include <utility>
 #include <vector>
 
 #include "dorogin_v_bin_img_conv_hull_OMP/common/include/common.hpp"
