@@ -68,7 +68,7 @@ bool ShkenevIConstrHullOMP::RunImpl() {
   auto &convex_hulls = work_.convex_hulls;
 
 #pragma omp parallel for default(none) shared(components, convex_hulls) num_threads(ppc::util::GetNumThreads())
-  for (int i = 0; std::cmp_less(i, components.size()); ++i) {
+  for (std::size_t i = 0; i < components.size(); ++i) {
     const auto &comp = components[i];
     if (comp.empty()) {
       continue;
