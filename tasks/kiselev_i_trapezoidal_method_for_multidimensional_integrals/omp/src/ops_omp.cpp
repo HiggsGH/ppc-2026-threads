@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <vector>
+#include <omp.h>
 
 #include "kiselev_i_trapezoidal_method_for_multidimensional_integrals/common/include/common.hpp"
 
@@ -43,12 +44,13 @@ double KiselevITestTaskOMP::ComputeIntegral(const std::vector<int> &steps) {
   double hx = (GetInput().right_bounds[0] - GetInput().left_bounds[0]) / steps[0];
   double hy = (GetInput().right_bounds[1] - GetInput().left_bounds[1]) / steps[1];
 
+#pragma omp parallel for reduction(+ : result) collapse(2)
   for (int i = 0; i <= steps[0]; i++) {
-    double x = GetInput().left_bounds[0] + (i * hx);
-    double wx = (i == 0 || i == steps[0]) ? 0.5 : 1.0;
-
     for (int j = 0; j <= steps[1]; j++) {
+      double x = GetInput().left_bounds[0] + (i * hx);
       double y = GetInput().left_bounds[1] + (j * hy);
+
+      double wx = (i == 0 || i == steps[0]) ? 0.5 : 1.0;
       double wy = (j == 0 || j == steps[1]) ? 0.5 : 1.0;
 
       result += wx * wy * FunctionTypeChoose(GetInput().type_function, x, y);
@@ -57,6 +59,7 @@ double KiselevITestTaskOMP::ComputeIntegral(const std::vector<int> &steps) {
 
   return result * hx * hy;
 }
+
 
 bool KiselevITestTaskOMP::RunImpl() {
   std::vector<int> steps = GetInput().step_n_size;
