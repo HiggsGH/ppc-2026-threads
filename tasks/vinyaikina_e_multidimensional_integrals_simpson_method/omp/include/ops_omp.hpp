@@ -18,7 +18,7 @@ class VinyaikinaEMultidimIntegrSimpsonOMP : public BaseTask {
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 
-  double I_res;
+  double I_res_;
 };
 
 }  // namespace vinyaikina_e_multidimensional_integrals_simpson_method
