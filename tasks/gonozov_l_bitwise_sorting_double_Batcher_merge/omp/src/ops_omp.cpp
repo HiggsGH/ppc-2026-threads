@@ -1,7 +1,11 @@
 #include "gonozov_l_bitwise_sorting_double_Batcher_merge/omp/include/ops_omp.hpp"
 
-#include <atomic>
-#include <numeric>
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <limits>
 #include <vector>
 
 #include "gonozov_l_bitwise_sorting_double_Batcher_merge/common/include/common.hpp"
@@ -9,16 +13,16 @@
 
 namespace gonozov_l_bitwise_sorting_double_batcher_merge {
 
-GonozovLBitSortBatcherMergeSEQ::GonozovLBitSortBatcherMergeSEQ(const InType &in) {
+GonozovLBitSortBatcherMergeOMP::GonozovLBitSortBatcherMergeSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
 }
 
-bool GonozovLBitSortBatcherMergeSEQ::ValidationImpl() {
+bool GonozovLBitSortBatcherMergeOMP::ValidationImpl() {
   return !GetInput().empty();  // проверка на то, что исходный массив непустой
 }
 
-bool GonozovLBitSortBatcherMergeSEQ::PreProcessingImpl() {
+bool GonozovLBitSortBatcherMergeOMP::PreProcessingImpl() {
   return true;
 }
 
@@ -165,14 +169,14 @@ void HybridSortDouble(std::vector<double> &data) {
 
 }  // namespace
 
-bool GonozovLBitSortBatcherMergeSEQ::RunImpl() {
+bool GonozovLBitSortBatcherMergeOMP::RunImpl() {
   std::vector<double> array = GetInput();
   HybridSortDouble(array);
   GetOutput() = array;
   return true;
 }
 
-bool GonozovLBitSortBatcherMergeSEQ::PostProcessingImpl() {
+bool GonozovLBitSortBatcherMergeOMP::PostProcessingImpl() {
   return true;
 }
 
