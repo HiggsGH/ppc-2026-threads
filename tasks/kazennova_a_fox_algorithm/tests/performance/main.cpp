@@ -36,8 +36,7 @@ class KazennovaAPerfTestSeq : public ppc::util::BaseRunPerfTests<InType, OutType
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return output_data.rows == input_data_.A.rows && 
-           output_data.cols == input_data_.B.cols &&
+    return output_data.rows == input_data_.A.rows && output_data.cols == input_data_.B.cols &&
            output_data.data.size() == static_cast<size_t>(output_data.rows) * output_data.cols;
   }
 

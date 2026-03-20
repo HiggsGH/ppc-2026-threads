@@ -1,10 +1,10 @@
 #include "kazennova_a_fox_algorithm/omp/include/ops_omp.hpp"
 
+#include <omp.h>
+
 #include <cmath>
 #include <cstddef>
 #include <vector>
-
-#include <omp.h>
 
 #include "kazennova_a_fox_algorithm/common/include/common.hpp"
 
@@ -54,12 +54,11 @@ bool KazennovaATestTaskOMP::ValidationImpl() {
   return true;
 }
 
-void KazennovaATestTaskOMP::DecomposeMatrix(const std::vector<double>& src,
-                                           std::vector<double>& dst,
-                                           int n, int bs, int q) {
+void KazennovaATestTaskOMP::DecomposeMatrix(const std::vector<double> &src, std::vector<double> &dst, int n, int bs,
+                                            int q) {
   size_t block_elements = static_cast<size_t>(bs) * bs;
 
-  #pragma omp parallel for collapse(2) default(none) shared(src, dst, n, bs, q, block_elements)
+#pragma omp parallel for collapse(2) default(none) shared(src, dst, n, bs, q, block_elements)
   for (int bi = 0; bi < q; ++bi) {
     for (int bj = 0; bj < q; ++bj) {
       size_t block_offset = ((static_cast<size_t>(bi) * q) + bj) * block_elements;
@@ -75,12 +74,11 @@ void KazennovaATestTaskOMP::DecomposeMatrix(const std::vector<double>& src,
   }
 }
 
-void KazennovaATestTaskOMP::AssembleMatrix(const std::vector<double>& src,
-                                           std::vector<double>& dst,
-                                           int n, int bs, int q) {
+void KazennovaATestTaskOMP::AssembleMatrix(const std::vector<double> &src, std::vector<double> &dst, int n, int bs,
+                                           int q) {
   size_t block_elements = static_cast<size_t>(bs) * bs;
 
-  #pragma omp parallel for collapse(2) default(none) shared(src, dst, n, bs, q, block_elements)
+#pragma omp parallel for collapse(2) default(none) shared(src, dst, n, bs, q, block_elements)
   for (int bi = 0; bi < q; ++bi) {
     for (int bj = 0; bj < q; ++bj) {
       size_t block_offset = ((static_cast<size_t>(bi) * q) + bj) * block_elements;
@@ -136,12 +134,12 @@ void KazennovaATestTaskOMP::MultiplyBlock(size_t a_idx, size_t b_idx, size_t c_i
 bool KazennovaATestTaskOMP::RunImpl() {
   size_t block_elements = static_cast<size_t>(block_size_) * block_size_;
 
-  for (auto& c_block : c_blocks_) {
+  for (auto &c_block : c_blocks_) {
     c_block = 0.0;
   }
 
   for (int step = 0; step < block_count_; ++step) {
-    #pragma omp parallel for collapse(2) default(none) shared(step, block_elements)
+#pragma omp parallel for collapse(2) default(none) shared(step, block_elements)
     for (int i = 0; i < block_count_; ++i) {
       for (int j = 0; j < block_count_; ++j) {
         int k = (i + step) % block_count_;

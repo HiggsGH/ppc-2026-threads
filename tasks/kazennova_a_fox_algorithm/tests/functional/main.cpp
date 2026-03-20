@@ -46,8 +46,7 @@ class KazennovaAFuncTestSeq : public ppc::util::BaseRunFuncTests<InType, OutType
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return output_data.rows == input_data_.A.rows && 
-           output_data.cols == input_data_.B.cols &&
+    return output_data.rows == input_data_.A.rows && output_data.cols == input_data_.B.cols &&
            output_data.data.size() == static_cast<size_t>(output_data.rows) * output_data.cols;
   }
 
@@ -65,12 +64,8 @@ TEST_P(KazennovaAFuncTestSeq, MatrixMultiplicationTest) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 4> kTestParam = {
-    std::make_tuple(2, "2x2"),
-    std::make_tuple(3, "3x3"),
-    std::make_tuple(5, "5x5"),
-    std::make_tuple(10, "10x10")
-};
+const std::array<TestType, 4> kTestParam = {std::make_tuple(2, "2x2"), std::make_tuple(3, "3x3"),
+                                            std::make_tuple(5, "5x5"), std::make_tuple(10, "10x10")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<KazennovaATestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_kazennova_a_fox_algorithm),
