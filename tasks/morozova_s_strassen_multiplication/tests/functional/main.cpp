@@ -123,8 +123,8 @@ class MorozovaSStrassenMultiplicationFuncTests : public ppc::util::BaseRunFuncTe
 
   void SetupTest9() {
     input_data_ = {1.0};
-    AddWeightedMatrix(1, [](int i, int j) { return 2.0; });
-    AddWeightedMatrix(1, [](int i, int j) { return 3.0; });
+    AddWeightedMatrix(1, [](int, int) { return 2.0; });
+    AddWeightedMatrix(1, [](int, int) { return 3.0; });
   }
 
   void SetupTest10() {
